@@ -1,6 +1,0 @@
-
-torch
-syft==0.8.1
-pandas
-numpy
-scikit-learn
