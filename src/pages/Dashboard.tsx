@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText,
@@ -9,12 +9,20 @@ import {
   Search,
   ChevronRight,
   MessageSquare,
+  X,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { useAuth } from "../contexts/AuthContext";
+import { useFiles } from "../contexts/FileContext";
+import { useToast } from "../contexts/ToastContext";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
+  const { files, uploadFile } = useFiles();
+  const { showToast } = useToast();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+
   const firstName = currentUser?.name.split(" ")[0] || "User";
 
   // Demo data for recent uploads and appointments
@@ -61,6 +69,46 @@ export default function Dashboard() {
     { label: "Weight", value: "68 kg", date: "2025-03-05" },
   ];
 
+  const handleFileUpload = async (file: File) => {
+    if (file.size > 20 * 1024 * 1024) { // 20MB limit
+      showToast("File size exceeds 20MB limit", "error");
+      return;
+    }
+
+    try {
+      await uploadFile(file);
+      setIsUploadModalOpen(false);
+    } catch (error) {
+      showToast("Failed to upload file", "error");
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      await handleFileUpload(file);
+    }
+  };
+
+  // Get recent uploads from files context
+  const recentUploadsFromContext = files
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
+
   return (
     <div className="animate-fade-in pb-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
@@ -74,7 +122,11 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
-          <Button variant="primary" leftIcon={<UploadCloud size={18} />}>
+          <Button 
+            variant="primary" 
+            leftIcon={<UploadCloud size={18} />}
+            onClick={() => setIsUploadModalOpen(true)}
+          >
             Upload Records
           </Button>
           <Button variant="outline" leftIcon={<Search size={18} />}>
@@ -82,6 +134,76 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Upload Medical Record
+                </h2>
+                <button
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center ${
+                  dragActive
+                    ? "border-primary-500 bg-primary-50"
+                    : "border-gray-300"
+                }`}
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+              >
+                <UploadCloud
+                  size={40}
+                  className={`mx-auto mb-4 ${
+                    dragActive ? "text-primary-500" : "text-gray-400"
+                  }`}
+                />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  {dragActive
+                    ? "Drop your file here"
+                    : "Drag and drop your file here"}
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  or click to browse your files
+                </p>
+
+                <input
+                  type="file"
+                  id="fileUpload"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleFileUpload(e.target.files[0]);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className="inline-block border px-4 py-2 rounded cursor-pointer bg-white hover:bg-gray-100"
+                >
+                  Browse Files
+                </label>
+
+                <p className="mt-2 text-xs text-gray-500">
+                  Supports PDF, JPEG, PNG (max. 20MB)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
@@ -169,7 +291,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {recentUploads.map((file) => (
+                    {recentUploadsFromContext.map((file) => (
                       <tr
                         key={file.id}
                         className="hover:bg-gray-50 transition-colors"

@@ -184,6 +184,13 @@ export default function Files() {
     setActiveDropdown(null);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      // Your upload logic here
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
@@ -603,29 +610,25 @@ export default function Files() {
                   or click to browse your files
                 </p>
 
-                <input
-                  type="file"
-                  id="fileUpload"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      showToast(
-                        `Selected ${e.target.files.length} files`,
-                        "success"
-                      );
-                    }
-                  }}
-                />
-                <label htmlFor="fileUpload">
-                  <Button
-                    variant="outline"
-                    leftIcon={<UploadCloud size={18} />}
-                    type="button"
-                  >
-                    Browse Files
-                  </Button>
-                </label>
+                <div>
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                  />
+                  <label htmlFor="fileUpload">
+                    <Button
+                      variant="outline"
+                      leftIcon={<UploadCloud size={18} />}
+                      type="button"
+                      className="w-full"
+                    >
+                      Browse Files
+                    </Button>
+                  </label>
+                </div>
 
                 <p className="mt-2 text-xs text-gray-500">
                   Supports PDF, JPEG, PNG (max. 20MB)

@@ -17,10 +17,12 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useFiles } from '../contexts/FileContext';
 
 export default function Profile() {
   const { currentUser, updateUser } = useAuth();
   const { showToast } = useToast();
+  const { files } = useFiles();
   const [isEditMode, setIsEditMode] = useState(false);
   
   // Form state
@@ -306,6 +308,46 @@ export default function Profile() {
                     leftIcon={<FileText size={18} className="text-gray-500" />}
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Medical Records</h3>
+                
+                {files.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {files.map((file) => (
+                      <div
+                        key={file.id}
+                        className="bg-white rounded-lg shadow-sm p-4 border border-gray-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileText size={20} className="text-gray-400 mr-2" />
+                            <div>
+                              <h4 className="font-medium text-gray-900">{file.name}</h4>
+                              <p className="text-sm text-gray-500">
+                                {new Date(file.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                            {file.category}
+                          </span>
+                        </div>
+                        {file.aiAnalysis && (
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <p className="text-sm text-gray-600">{file.aiAnalysis.summary}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 bg-gray-50 rounded-lg">
+                    <FileText size={32} className="mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500">No medical records uploaded yet</p>
+                  </div>
+                )}
               </div>
               
               {isEditMode && (
