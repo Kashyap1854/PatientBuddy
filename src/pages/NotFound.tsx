@@ -30,7 +30,8 @@ export default function NotFound() {
           <Button
             variant="outline"
             leftIcon={<ArrowLeft size={18} />}
-            onClick={() => window.history.back()}
+            onClick={() => (window.location.href = "/landing")}
+            className="text-gray-800 bg-white border-gray-300 hover:bg-gray-100"
           >
             Go Back
           </Button>
