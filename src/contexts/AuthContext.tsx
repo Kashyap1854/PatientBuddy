@@ -14,6 +14,7 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -103,6 +104,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  function updateUser(userData: Partial<User>) {
+    if (currentUser) {
+      const updatedUser = { ...currentUser, ...userData };
+      setCurrentUser(updatedUser);
+      localStorage.setItem("medvault_user", JSON.stringify(updatedUser));
+    }
+  }
+
   const value = {
     currentUser,
     loading,
@@ -110,6 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signup,
     logout,
     isAuthenticated: !!currentUser,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

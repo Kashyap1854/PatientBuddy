@@ -9,7 +9,9 @@ import {
   AlertCircle,
   Heart,
   Activity,
-  Edit
+  Edit,
+  X,
+  PlusCircle
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -17,7 +19,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 
 export default function Profile() {
-  const { currentUser } = useAuth();
+  const { currentUser, updateUser } = useAuth();
   const { showToast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   
@@ -61,7 +63,11 @@ export default function Profile() {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would update the user profile via API call
+    // Update the user data in AuthContext
+    updateUser({
+      name: formData.name,
+      email: formData.email,
+    });
     showToast('Profile updated successfully', 'success');
     setIsEditMode(false);
   };
@@ -111,7 +117,7 @@ export default function Profile() {
               <h2 className="text-lg font-semibold text-white">Personal Information</h2>
             </div>
             
-            <form onSubmit={handleSubmit} className="p-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="flex flex-col sm:flex-row items-center mb-6">
                 <div className="sm:mr-6 mb-4 sm:mb-0">
                   <img
@@ -127,7 +133,7 @@ export default function Profile() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <Input
                   label="Full Name"
                   name="name"
@@ -220,7 +226,7 @@ export default function Profile() {
                 </div>
               </div>
               
-              <div className="mt-6 border-t pt-6">
+              <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Medical Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,7 +260,7 @@ export default function Profile() {
                 </div>
               </div>
               
-              <div className="mt-6 border-t pt-6">
+              <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Emergency Contact</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,7 +284,7 @@ export default function Profile() {
                 </div>
               </div>
               
-              <div className="mt-6 border-t pt-6">
+              <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Insurance Information</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -423,7 +429,7 @@ export default function Profile() {
           </div>
           
           {/* Data Privacy Notice */}
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-start">
               <AlertCircle className="text-secondary-500 mr-3 flex-shrink-0 mt-0.5" size={20} />
               <div>
