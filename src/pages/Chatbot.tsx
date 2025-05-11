@@ -6,7 +6,6 @@ import {
   Bot,
   User,
   X,
-  FileUp,
   Loader,
   HelpCircle,
 } from "lucide-react";
