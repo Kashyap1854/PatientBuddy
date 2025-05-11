@@ -61,7 +61,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Category input before uploading */}
+      {/* Category input before uploading 
       <div className="mb-6">
         <label
           htmlFor="category"
@@ -77,8 +77,7 @@ export default function Dashboard() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
-      </div>
-
+      </div> */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
