@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       await logout();
       showToast("Logged out successfully", "success");
       navigate("/login");
-    } catch (error) {
+    } catch {
       showToast("Failed to log out", "error");
     }
   };
@@ -50,12 +50,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { path: "/profile", label: "Profile", icon: <User size={20} /> },
   ];
 
-  const isActive = (path: string) => {
-    return (
-      location.pathname === path ||
-      (path !== "/" && location.pathname.startsWith(path))
-    );
-  };
+  const isActive = (path: string) =>
+    location.pathname === path ||
+    (path !== "/" && location.pathname.startsWith(path));
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -77,9 +74,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center">
-            <Stethoscope className="h-8 w-8 text-blue-600 py-1" />
-            <span className="ml-2 text-xl font-bold text-gray-900 py-4">
+          <div className="flex items-center px-4 py-6">
+            <Stethoscope className="h-8 w-8 text-blue-600" />
+            <span className="ml-2 text-xl font-bold text-gray-900">
               PatientBuddy
             </span>
           </div>
@@ -106,17 +103,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </ul>
           </nav>
 
-          {/* User profile */}
+          {/* User profile & actions */}
           <div className="border-t p-4">
             <div className="flex items-center gap-3">
-              <img
-                src={
-                  currentUser?.profilePicture ||
-                  "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg"
-                }
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover"
-              />
+              {/* Profile Icon in place of image */}
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <User className="text-gray-500" size={24} />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {currentUser?.name || "User"}
@@ -125,6 +118,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   {currentUser?.email || "user@example.com"}
                 </p>
               </div>
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
                 className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
@@ -142,18 +137,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div
           className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:pl-64">
         {/* Top header */}
         <header className="sticky top-0 z-10 bg-white shadow-sm h-16 flex items-center px-4 lg:px-6">
-          <div className="flex-1"></div>
+          <div className="flex-1" />
           <div className="flex items-center gap-4">
             <button className="p-2 rounded-full text-gray-500 hover:bg-gray-100 relative">
               <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full" />
             </button>
           </div>
         </header>

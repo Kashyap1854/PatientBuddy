@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, UploadCloud, Search, ChevronRight } from "lucide-react";
-import Button from "../components/ui/Button";
+import { FileText, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useFileContext } from "../contexts/FileContext";
 
@@ -48,16 +47,6 @@ export default function Dashboard() {
             multiple
             onChange={handleFileUpload}
           />
-          <Button
-            variant="primary"
-            leftIcon={<UploadCloud size={18} />}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Upload Records
-          </Button>
-          <Button variant="outline" leftIcon={<Search size={18} />}>
-            Search Records
-          </Button>
         </div>
       </div>
 
