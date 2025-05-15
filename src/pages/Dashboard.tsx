@@ -1,8 +1,30 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FileText, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useFileContext } from "../contexts/FileContext";
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Diagnosis: "bg-red-100 text-red-700",
+  Prescription: "bg-green-100 text-green-700",
+  Lab: "bg-blue-100 text-blue-700",
+  Imaging: "bg-purple-100 text-purple-700",
+  Uncategorized: "bg-gray-100 text-gray-700",
+};
+
+const FREQUENT_CATEGORIES = [
+  "Diagnosis",
+  "Prescription",
+  "Lab",
+  "Imaging",
+  "Uncategorized",
+];
+
+type UploadFile = {
+  file: File;
+  id: string;
+  category: string;
+};
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -10,20 +32,69 @@ export default function Dashboard() {
   const { files, setFiles } = useFileContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [category, setCategory] = useState<string>("");
+  const [uploadQueue, setUploadQueue] = useState<UploadFile[]>([]);
+  const [recentCategories, setRecentCategories] = useState<string[]>([]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploaded = Array.from(e.target.files || []).map((file) => ({
+  // Load recent categories from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("recentCategories");
+    if (saved) setRecentCategories(JSON.parse(saved));
+  }, []);
+
+  // Save recent categories to localStorage whenever updated
+  useEffect(() => {
+    localStorage.setItem("recentCategories", JSON.stringify(recentCategories));
+  }, [recentCategories]);
+
+  // When user selects files, add to upload queue with empty category
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    const newQueueFiles = selectedFiles.map((file) => ({
+      file,
+      id: crypto.randomUUID(),
+      category: "",
+    }));
+    setUploadQueue((prev) => [...prev, ...newQueueFiles]);
+    e.target.value = ""; // reset input
+  };
+
+  // Update category for a file in upload queue
+  const updateCategory = (id: string, category: string) => {
+    setUploadQueue((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, category } : item))
+    );
+  };
+
+  // Upload all files with validation: category required
+  const handleUpload = () => {
+    // Check if all categories are filled
+    if (uploadQueue.some((f) => !f.category.trim())) {
+      alert("Please select a category for all files before uploading.");
+      return;
+    }
+
+    // Add uploaded files to global files context
+    const uploaded = uploadQueue.map(({ file, category }) => ({
       id: crypto.randomUUID(),
       name: file.name,
       type: file.type.split("/")[1]?.toUpperCase() || "FILE",
       size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       date: new Date().toISOString(),
-      category: category || "Uncategorized", // Use the provided category or default to 'Uncategorized'
+      category,
       tags: [],
     }));
+
     setFiles([...files, ...uploaded]);
-    setCategory(""); // Clear category after upload
+    setUploadQueue([]);
+
+    // Update recent categories list, keep unique and max 10
+    const newCategories = [
+      ...recentCategories,
+      ...uploadQueue.map((f) => f.category),
+    ]
+      .filter((c, i, arr) => c && arr.indexOf(c) === i)
+      .slice(-10);
+    setRecentCategories(newCategories);
   };
 
   const recentUploads = [...files].reverse().slice(0, 5);
@@ -39,34 +110,92 @@ export default function Dashboard() {
             Here's an overview of your health records
           </p>
         </div>
-        <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
+
+        <div>
           <input
             ref={fileInputRef}
             type="file"
-            hidden
             multiple
-            onChange={handleFileUpload}
+            hidden
+            onChange={handleFilesSelected}
           />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition"
+          >
+            Select Files
+          </button>
         </div>
       </div>
 
-      {/* Category input before uploading 
-      <div className="mb-6">
-        <label
-          htmlFor="category"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Category
-        </label>
-        <input
-          id="category"
-          type="text"
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder="Enter Category (e.g., Diagnosis)"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
-      </div> */}
+      {/* Upload Queue with category selector */}
+      {uploadQueue.length > 0 && (
+        <div className="mb-6 bg-white p-4 rounded shadow-sm">
+          <h2 className="text-lg font-semibold mb-3">Files to Upload</h2>
+          <div className="space-y-3 max-h-60 overflow-y-auto">
+            {uploadQueue.map(({ id, file, category }) => (
+              <div
+                key={id}
+                className="flex items-center justify-between border border-gray-200 rounded p-2"
+              >
+                <div className="flex items-center gap-3">
+                  <FileText className="text-gray-600" size={18} />
+                  <span className="font-medium">{file.name}</span>
+                </div>
+
+                <select
+                  value={category}
+                  onChange={(e) => updateCategory(id, e.target.value)}
+                  className="rounded border border-gray-300 px-2 py-1"
+                >
+                  <option value="">Select Category</option>
+                  {FREQUENT_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                  {recentCategories
+                    .filter((c) => !FREQUENT_CATEGORIES.includes(c))
+                    .map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleUpload}
+            className="mt-4 bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 transition"
+          >
+            Upload All
+          </button>
+        </div>
+      )}
+
+      {/* Summary cards with category counts */}
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {[...new Set(files.map((f) => f.category || "Uncategorized"))].map(
+          (category) => {
+            const count = files.filter((f) => f.category === category).length;
+            const colorClass =
+              CATEGORY_COLORS[category] || CATEGORY_COLORS["Uncategorized"];
+            return (
+              <div
+                key={category}
+                className={`p-4 rounded shadow-sm flex flex-col items-center justify-center ${colorClass}`}
+              >
+                <div className="text-lg font-bold">{count}</div>
+                <div className="text-sm mt-1">{category}</div>
+              </div>
+            );
+          }
+        )}
+      </div>
+
+      {/* Recent uploads table */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -112,7 +241,12 @@ export default function Dashboard() {
                       </div>
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          CATEGORY_COLORS[file.category] ||
+                          CATEGORY_COLORS["Uncategorized"]
+                        }`}
+                      >
                         {file.category}
                       </span>
                     </td>
@@ -130,8 +264,6 @@ export default function Dashboard() {
           </p>
         )}
       </div>
-
-      {/* You can keep the rest of appointments, health tips, and assistant UI unchanged */}
     </div>
   );
 }
