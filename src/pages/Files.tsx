@@ -26,6 +26,7 @@ interface FileType {
   filename: string;
   content: string;
   uploadedAt: string;
+  category: string;
 }
 
 export default function Files() {
@@ -37,6 +38,8 @@ export default function Files() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<FileType | null>(null);
+  const [category, setCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +63,7 @@ export default function Files() {
     if (!fileToUpload) return;
     const formData = new FormData();
     formData.append("file", fileToUpload);
+    formData.append("category", category);
 
     try {
       const res = await axios.post(`${API_URL}/upload`, formData, {
@@ -74,6 +78,7 @@ export default function Files() {
 
     setIsModalOpen(false);
     setFileToUpload(null);
+    setCategory("");
   };
 
   // Delete handler
@@ -97,10 +102,20 @@ export default function Files() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // Grouped files by category
+  const groupedFiles = files.reduce((acc, file) => {
+    const cat = file.category || "Uncategorized";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(file);
+    return acc;
+  }, {} as Record<string, FileType[]>);
+
   // Filtered files
-  const filteredFiles = files.filter((f) =>
-    f.filename.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFiles = selectedCategory
+    ? files.filter((f) => f.category === selectedCategory)
+    : files.filter((f) =>
+        f.filename.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
   return (
     <div className="animate-fade-in">
@@ -144,12 +159,20 @@ export default function Files() {
                 className="w-full border rounded p-2"
               />
             </div>
+            <div className="mb-4">
+              <Input
+                placeholder="Enter category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              />
+            </div>
             <div className="flex justify-end gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
                   setIsModalOpen(false);
                   setFileToUpload(null);
+                  setCategory("");
                 }}
               >
                 Cancel
@@ -213,6 +236,22 @@ export default function Files() {
               <List size={18} />
             </button>
           </div>
+        </div>
+
+        {/* Category Dropdown */}
+        <div className="mb-4">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="border rounded p-2 w-full"
+          >
+            <option value="">All Categories</option>
+            {Array.from(new Set(files.map((f) => f.category).filter(Boolean))).map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
         </div>
 
         {filteredFiles.length > 0 ? (

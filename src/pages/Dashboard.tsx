@@ -1,8 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FileText, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useFileContext } from "../contexts/FileContext";
+import axios from "axios";
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -11,6 +12,7 @@ export default function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [category, setCategory] = useState<string>("");
+  const [recentFiles, setRecentFiles] = useState<any[]>([]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = Array.from(e.target.files || []).map((file) => ({
@@ -26,7 +28,11 @@ export default function Dashboard() {
     setCategory(""); // Clear category after upload
   };
 
-  const recentUploads = [...files].reverse().slice(0, 5);
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/files")
+      .then((res) => setRecentFiles((res.data as any[]).slice(0, 5))); // Show 5 most recent
+  }, []);
 
   return (
     <div className="animate-fade-in pb-6">
@@ -81,48 +87,15 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {recentUploads.length > 0 ? (
+        {recentFiles.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date Added
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {recentUploads.map((file) => (
-                  <tr
-                    key={file.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText size={18} className="text-gray-500 mr-2" />
-                        <span className="text-sm text-gray-900">
-                          {file.name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                        {file.category}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(file.date).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul>
+              {recentFiles.map((f) => (
+                <li key={f._id}>
+                  {f.filename} ({new Date(f.uploadedAt).toLocaleString()})
+                </li>
+              ))}
+            </ul>
           </div>
         ) : (
           <p className="text-gray-500">
