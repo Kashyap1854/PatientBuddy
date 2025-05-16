@@ -1,4 +1,4 @@
-import * as express from "express";
+import express from "express";
 import fileRoutes from "./routes/fileRoutes";
 import "./db"; // Connect to MongoDB
 
@@ -6,6 +6,9 @@ const app = express();
 const cors = require("cors");
 app.use(cors());
 app.use(express.json());
+
+// Serve uploads folder statically
+app.use("/uploads", express.static("uploads"));
 
 app.use("/api/files", fileRoutes);
 
