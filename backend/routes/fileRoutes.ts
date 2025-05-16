@@ -4,7 +4,16 @@ import { uploadFile, getFiles } from "../controllers/fileController";
 import FileModel from "../db/FileModel";
 
 const router = Router();
-const upload = multer({ dest: "uploads/" });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // Save with original filename
+  },
+});
+const upload = multer({ storage });
 
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) => {
 	Promise.resolve(fn(req, res, next)).catch(next);
