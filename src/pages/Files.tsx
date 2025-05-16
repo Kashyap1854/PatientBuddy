@@ -16,6 +16,9 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/files";
 
+const getFileUrl = (filename: string) =>
+  `http://localhost:5000/uploads/${encodeURIComponent(filename)}`;
+
 type ViewMode = "grid" | "list";
 
 interface FileType {
@@ -232,7 +235,7 @@ export default function Files() {
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => setPreviewFile(f)}
+                        onClick={() => window.open(getFileUrl(f.filename), "_blank")}
                         className="text-blue-500 hover:text-blue-700"
                         title="Preview"
                       >
@@ -254,7 +257,7 @@ export default function Files() {
                     <FileText size={20} />
                     <div>
                       <button
-                        onClick={() => setPreviewFile(f)}
+                        onClick={() => window.open(getFileUrl(f.filename), "_blank")}
                         className="text-blue-500 hover:text-blue-700 mr-2"
                         title="Preview"
                       >
