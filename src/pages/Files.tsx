@@ -133,16 +133,17 @@ export default function Files() {
       </div>
 
       {/* Upload Modal */}
-      {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)}>
+      {isModalOpen && fileToUpload && (
+        <Modal
+          onClose={() => {
+            setIsModalOpen(false);
+            setFileToUpload(null);
+          }}
+        >
           <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Upload File</h2>
+            <h2 className="text-xl font-bold mb-4">Ready to upload?</h2>
             <div className="mb-4">
-              <input
-                type="file"
-                onChange={onFileChange}
-                className="w-full border rounded p-2"
-              />
+              <strong>File:</strong> {fileToUpload.name}
             </div>
             <div className="flex justify-end gap-3">
               <Button
@@ -154,9 +155,7 @@ export default function Files() {
               >
                 Cancel
               </Button>
-              <Button onClick={handleUpload} disabled={!fileToUpload}>
-                Upload
-              </Button>
+              <Button onClick={handleUpload}>Upload</Button>
             </div>
           </div>
         </Modal>
