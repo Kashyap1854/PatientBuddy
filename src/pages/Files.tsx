@@ -26,7 +26,6 @@ interface FileType {
   filename: string;
   content: string;
   uploadedAt: string;
-  category: string;
 }
 
 export default function Files() {
@@ -38,8 +37,6 @@ export default function Files() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<FileType | null>(null);
-  const [category, setCategory] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,7 +60,6 @@ export default function Files() {
     if (!fileToUpload) return;
     const formData = new FormData();
     formData.append("file", fileToUpload);
-    formData.append("category", category.trim() || "Uncategorized");
 
     try {
       const res = await axios.post(`${API_URL}/upload`, formData, {
@@ -78,7 +74,6 @@ export default function Files() {
 
     setIsModalOpen(false);
     setFileToUpload(null);
-    setCategory("");
   };
 
   // Delete handler
@@ -102,19 +97,10 @@ export default function Files() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Group unique categories (including "Uncategorized" if needed)
-  const uniqueCategories = Array.from(
-    new Set(
-      files.map((f) => f.category && f.category.trim() !== "" ? f.category : "Uncategorized")
-    )
+  // Filtered files by search term only
+  const filteredFiles = files.filter((f) =>
+    f.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Filtered files logic (use this for rendering)
-  const filteredFiles = selectedCategory.length > 0
-    ? files.filter((f) =>
-        selectedCategory.includes(f.category && f.category.trim() !== "" ? f.category : "Uncategorized")
-      )
-    : files;
 
   return (
     <div className="animate-fade-in">
@@ -158,20 +144,12 @@ export default function Files() {
                 className="w-full border rounded p-2"
               />
             </div>
-            <div className="mb-4">
-              <Input
-                placeholder="Enter category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              />
-            </div>
             <div className="flex justify-end gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
                   setIsModalOpen(false);
                   setFileToUpload(null);
-                  setCategory("");
                 }}
               >
                 Cancel
@@ -235,29 +213,6 @@ export default function Files() {
               <List size={18} />
             </button>
           </div>
-        </div>
-
-        {/* Category Dropdown */}
-        <div className="mb-4">
-          {uniqueCategories.length > 0 ? (
-            <select
-              multiple
-              value={selectedCategory}
-              onChange={(e) =>
-                setSelectedCategory(Array.from(e.target.selectedOptions, (option) => option.value))
-              }
-              className="border rounded p-2 w-full"
-              size={Math.min(uniqueCategories.length, 6)} // Show up to 6 options at once
-            >
-              {uniqueCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="text-gray-400 text-sm">No categories available</div>
-          )}
         </div>
 
         {filteredFiles.length > 0 ? (
