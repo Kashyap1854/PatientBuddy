@@ -39,7 +39,7 @@ export default function Files() {
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<FileType | null>(null);
   const [category, setCategory] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,7 +63,7 @@ export default function Files() {
     if (!fileToUpload) return;
     const formData = new FormData();
     formData.append("file", fileToUpload);
-    formData.append("category", category);
+    formData.append("category", category.trim() || "Uncategorized");
 
     try {
       const res = await axios.post(`${API_URL}/upload`, formData, {
@@ -102,20 +102,19 @@ export default function Files() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Grouped files by category
-  const groupedFiles = files.reduce((acc, file) => {
-    const cat = file.category || "Uncategorized";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(file);
-    return acc;
-  }, {} as Record<string, FileType[]>);
+  // Group unique categories (including "Uncategorized" if needed)
+  const uniqueCategories = Array.from(
+    new Set(
+      files.map((f) => f.category && f.category.trim() !== "" ? f.category : "Uncategorized")
+    )
+  );
 
-  // Filtered files
-  const filteredFiles = selectedCategory
-    ? files.filter((f) => f.category === selectedCategory)
-    : files.filter((f) =>
-        f.filename.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  // Filtered files logic (use this for rendering)
+  const filteredFiles = selectedCategory.length > 0
+    ? files.filter((f) =>
+        selectedCategory.includes(f.category && f.category.trim() !== "" ? f.category : "Uncategorized")
+      )
+    : files;
 
   return (
     <div className="animate-fade-in">
@@ -240,18 +239,25 @@ export default function Files() {
 
         {/* Category Dropdown */}
         <div className="mb-4">
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border rounded p-2 w-full"
-          >
-            <option value="">All Categories</option>
-            {Array.from(new Set(files.map((f) => f.category).filter(Boolean))).map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+          {uniqueCategories.length > 0 ? (
+            <select
+              multiple
+              value={selectedCategory}
+              onChange={(e) =>
+                setSelectedCategory(Array.from(e.target.selectedOptions, (option) => option.value))
+              }
+              className="border rounded p-2 w-full"
+              size={Math.min(uniqueCategories.length, 6)} // Show up to 6 options at once
+            >
+              {uniqueCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-gray-400 text-sm">No categories available</div>
+          )}
         </div>
 
         {filteredFiles.length > 0 ? (
