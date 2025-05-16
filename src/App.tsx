@@ -26,8 +26,11 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <Routes>
-            {/* Public routes */}
+            {/* Redirect root to landing */}
+            <Route path="/" element={<Landing />} />
             <Route path="/landing" element={<Landing />} />
+
+            {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
