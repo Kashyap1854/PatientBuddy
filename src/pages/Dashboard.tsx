@@ -88,14 +88,42 @@ export default function Dashboard() {
         </div>
 
         {recentFiles.length > 0 ? (
-          <div className="overflow-x-auto">
-            <ul>
-              {recentFiles.map((f) => (
-                <li key={f._id}>
-                  {f.filename} ({new Date(f.uploadedAt).toLocaleString()})
-                </li>
-              ))}
-            </ul>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {recentFiles.map((f) => (
+              <div
+                key={f._id}
+                className="bg-gray-50 rounded-lg shadow p-4 flex flex-col items-center"
+              >
+                <div className="w-20 h-20 flex items-center justify-center bg-gray-200 rounded shadow mb-3">
+                  {/* Plain rectangle, no image */}
+                </div>
+                {/* File Name */}
+                <div className="font-medium text-center text-gray-800 text-sm truncate w-full">
+                  {f.filename}
+                </div>
+                {/* Date */}
+                <div className="text-xs text-gray-400 mb-2">
+                  {new Date(f.uploadedAt).toLocaleDateString()}
+                </div>
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <button
+                    className="text-blue-600 hover:underline text-xs"
+                    onClick={() =>
+                      window.open(
+                        `http://localhost:5000/uploads/${encodeURIComponent(
+                          f.filename
+                        )}`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    Preview
+                  </button>
+                  {/* Add more actions here if needed */}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-gray-500">
