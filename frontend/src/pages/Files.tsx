@@ -1,13 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  FileText,
-  PlusCircle,
-  Search,
-  Grid,
-  List,
-  Trash2,
-  Eye,
-} from "lucide-react";
+import { FileText, PlusCircle, Search, Grid, List, Eye } from "lucide-react";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Modal from "../components/ui/Modal";
