@@ -36,57 +36,57 @@ interface Message {
 
 const CHAT_STORAGE_KEY = "patientbuddy_chat_messages";
 
+const getInitialMessages = () => {
+  const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved).map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp),
+      }));
+      return parsed.length
+        ? parsed
+        : [
+            {
+              id: "1",
+              text:
+                "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+              sender: "assistant",
+              timestamp: new Date(),
+            },
+          ];
+    } catch {
+      // If parsing fails, show welcome message
+      return [
+        {
+          id: "1",
+          text:
+            "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+          sender: "assistant",
+          timestamp: new Date(),
+        },
+      ];
+    }
+  } else {
+    return [
+      {
+        id: "1",
+        text:
+          "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+        sender: "assistant",
+        timestamp: new Date(),
+      },
+    ];
+  }
+};
+
 export default function Chatbot() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(getInitialMessages);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
-
-  // Load messages from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved).map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        }));
-        // If parsed is empty, show welcome message
-        if (parsed.length === 0) {
-          setMessages([
-            {
-              id: "1",
-              text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
-              sender: "assistant",
-              timestamp: new Date(),
-            },
-          ]);
-        } else {
-          setMessages(parsed);
-        }
-      } catch {
-        setMessages([
-          {
-            id: "1",
-            text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
-            sender: "assistant",
-            timestamp: new Date(),
-          },
-        ]);
-      }
-    } else {
-      setMessages([
-        {
-          id: "1",
-          text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
-          sender: "assistant",
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  }, []);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
