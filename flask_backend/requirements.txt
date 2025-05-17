@@ -1,0 +1,11 @@
+Flask
+pytesseract
+regex
+Pillow
+numpy
+pandas
+PyPDF2
+pdf2image
+torch
+opencv-python
+transformers
