@@ -34,25 +34,74 @@ interface Message {
   };
 }
 
+const CHAT_STORAGE_KEY = "patientbuddy_chat_messages";
+
 export default function Chatbot() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
-      sender: "assistant",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
+  // Load messages from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved).map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+        // If parsed is empty, show welcome message
+        if (parsed.length === 0) {
+          setMessages([
+            {
+              id: "1",
+              text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+              sender: "assistant",
+              timestamp: new Date(),
+            },
+          ]);
+        } else {
+          setMessages(parsed);
+        }
+      } catch {
+        setMessages([
+          {
+            id: "1",
+            text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+            sender: "assistant",
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } else {
+      setMessages([
+        {
+          id: "1",
+          text: "Hello! I'm your Buddy AI Assistant. I can help you understand your medical records, prescriptions, and answer health-related questions. How can I assist you today?",
+          sender: "assistant",
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    console.log("Saving messages to localStorage:", messages);
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Test localStorage functionality
+  localStorage.setItem("test", JSON.stringify([{ text: "hello" }]));
+  console.log(localStorage.getItem("test"));
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && !selectedFile) return;
