@@ -76,35 +76,47 @@ export default function Chatbot() {
     setSelectedFile(null);
     setIsLoading(true);
 
-    try {
-      // Call your backend, which should use Google Gemini or OpenAI API
-      const res = await fetch("http://localhost:5000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: inputMessage }),
-      });
-      const data = await res.json();
+    // Simulate AI response delay
+    setTimeout(() => {
+      // Mock responses based on keywords
+      let responseText = "I understand your question. ";
+
+      if (
+        inputMessage.toLowerCase().includes("blood test") ||
+        inputMessage.toLowerCase().includes("lab")
+      ) {
+        responseText +=
+          "Blood test results can be complex. Normal ranges vary by lab and patient. For a complete interpretation, I'd recommend discussing your specific results with your healthcare provider. If you'd like, you can upload your blood test report and I can help explain the key markers.";
+      } else if (
+        inputMessage.toLowerCase().includes("prescription") ||
+        inputMessage.toLowerCase().includes("medication") ||
+        inputMessage.toLowerCase().includes("drug")
+      ) {
+        responseText +=
+          "Medications should be taken exactly as prescribed by your doctor. It's important to complete the full course, even if you start feeling better. If you're experiencing side effects, please consult your healthcare provider before making any changes to your treatment plan.";
+      } else if (
+        inputMessage.toLowerCase().includes("mri") ||
+        inputMessage.toLowerCase().includes("scan") ||
+        inputMessage.toLowerCase().includes("x-ray") ||
+        inputMessage.toLowerCase().includes("imaging")
+      ) {
+        responseText +=
+          "Medical imaging reports contain specialized terminology. The radiologist's findings describe what they observed in your scan, while the impression section summarizes the key conclusions. Your doctor will interpret these results in the context of your overall health.";
+      } else {
+        responseText +=
+          "I'm here to help you understand your medical information. Please feel free to ask specific questions about your health records, prescriptions, or medical terminology, and I'll do my best to explain them clearly.";
+      }
 
       const newAiMessage: Message = {
         id: Date.now().toString(),
-        text: data.reply || "Sorry, I couldn't find an answer.",
+        text: responseText,
         sender: "assistant",
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, newAiMessage]);
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          text: "Sorry, something went wrong. Please try again.",
-          sender: "assistant",
-          timestamp: new Date(),
-        },
-      ]);
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    }, 1500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
