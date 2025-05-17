@@ -28,7 +28,7 @@ interface FileType {
   uploadedAt: string;
 }
 
-export default function Files() {
+const Files: React.FC = () => {
   const { showToast } = useToast();
 
   const [files, setFiles] = useState<FileType[]>([]);
@@ -37,6 +37,9 @@ export default function Files() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<FileType | null>(null);
+  const [extractedData, setExtractedData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,19 +64,31 @@ export default function Files() {
     const formData = new FormData();
     formData.append("file", fileToUpload);
 
+    setLoading(true);
+    setError(null);
+
     try {
+      // 1. Upload to Node backend
       const res = await axios.post(`${API_URL}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       showToast("File uploaded successfully", "success");
       const uploadedFile = (res.data as { data: FileType }).data;
       setFiles((prev) => [uploadedFile, ...prev]);
+
+      // 2. Also send to Flask backend for analysis (no UI update needed)
+      await fetch("/api/ai/extract", {
+        method: "POST",
+        body: formData,
+      });
+      // No need to handle the response or show analyzed data in UI
     } catch (error) {
       showToast("Failed to upload file", "error");
+    } finally {
+      setLoading(false);
+      setIsModalOpen(false);
+      setFileToUpload(null);
     }
-
-    setIsModalOpen(false);
-    setFileToUpload(null);
   };
 
   // Delete handler
@@ -138,6 +153,8 @@ export default function Files() {
           onClose={() => {
             setIsModalOpen(false);
             setFileToUpload(null);
+            setExtractedData(null);
+            setError(null);
           }}
         >
           <div className="p-4">
@@ -145,17 +162,59 @@ export default function Files() {
             <div className="mb-4">
               <strong>File:</strong> {fileToUpload.name}
             </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setFileToUpload(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleUpload}>Upload</Button>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setFileToUpload(null);
+                    setExtractedData(null);
+                    setError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleUpload}>Upload</Button>
+                <Button
+                  onClick={async () => {
+                    setLoading(true);
+                    setError(null);
+                    setExtractedData(null);
+                    try {
+                      const formData = new FormData();
+                      formData.append("file", fileToUpload);
+
+                      const response = await fetch("/api/ai/extract", {
+                        method: "POST",
+                        body: formData,
+                      });
+
+                      if (!response.ok) {
+                        throw new Error("Failed to extract data from file.");
+                      }
+
+                      const data = await response.json();
+                      setExtractedData(data);
+                    } catch (err: any) {
+                      setError(err.message || "Unknown error");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  variant="secondary"
+                >
+                  {loading ? "Analyzing..." : "Analyze"}
+                </Button>
+              </div>
+              {error && <div style={{ color: "red" }}>{error}</div>}
+              {extractedData && (
+                <div className="mt-4">
+                  <h3>Extracted Data:</h3>
+                  <pre>{JSON.stringify(extractedData, null, 2)}</pre>
+                </div>
+              )}
             </div>
           </div>
         </Modal>
@@ -281,4 +340,6 @@ export default function Files() {
       </div>
     </div>
   );
-}
+};
+
+export default Files;

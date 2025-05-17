@@ -25,4 +25,4 @@ if __name__ == '__main__':
         print("After installation, run: ollama pull phi3\n")
     
     print("Starting web server...")
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
