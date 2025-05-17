@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import * as fs from "fs";
 import FileModel from "../db/FileModel";
 import { extractText } from "../services/extractService";
 

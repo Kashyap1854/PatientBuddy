@@ -1,13 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import Toast from '../components/ui/Toast';
+import React, { createContext, useContext, useState } from 'react';
 
-type ToastType = 'success' | 'error' | 'info' | 'warning';
-
-interface ToastMessage {
-  id: string;
-  type: ToastType;
-  message: string;
-}
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastContextType {
   showToast: (message: string, type: ToastType) => void;
@@ -15,48 +8,34 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export function useToast() {
+export const useToast = () => {
   const context = useContext(ToastContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useToast must be used within a ToastProvider');
   }
   return context;
-}
+};
 
-interface ToastProviderProps {
-  children: ReactNode;
-}
-
-export function ToastProvider({ children }: ToastProviderProps) {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   const showToast = (message: string, type: ToastType) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts(prev => [...prev, { id, type, message }]);
-    
-    // Auto remove toast after 5 seconds
-    setTimeout(() => {
-      setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 5000);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-0 right-0 p-4 z-50 flex flex-col gap-2">
-        {toasts.map(toast => (
-          <Toast 
-            key={toast.id}
-            type={toast.type}
-            message={toast.message}
-            onClose={() => removeToast(toast.id)}
-          />
-        ))}
-      </div>
+      {toast && (
+        <div className={`fixed bottom-4 right-4 p-4 rounded-md shadow-lg ${
+          toast.type === 'success' ? 'bg-green-500' :
+          toast.type === 'error' ? 'bg-red-500' :
+          toast.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+        } text-white`}>
+          {toast.message}
+        </div>
+      )}
     </ToastContext.Provider>
   );
-}
+};

@@ -22,9 +22,9 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <ToastProvider>
+    <ToastProvider>
+      <Router>
+        <AuthProvider>
           <Routes>
             {/* Redirect root to landing */}
             <Route path="/" element={<Landing />} />
@@ -80,9 +80,9 @@ function App() {
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
-        </ToastProvider>
-      </AuthProvider>
-    </Router>
+        </AuthProvider>
+      </Router>
+    </ToastProvider>
   );
 }
 

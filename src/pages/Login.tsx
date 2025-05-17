@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
@@ -51,7 +52,7 @@ export default function Login() {
     if (!validate()) return;
 
     try {
-      await login(email, password);
+      await login(email);
       showToast("Logged in successfully!", "success");
       navigate(from, { replace: true }); // ✅ Only navigate if login succeeds
     } catch (error) {
