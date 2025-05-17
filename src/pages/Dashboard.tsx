@@ -15,15 +15,18 @@ export default function Dashboard() {
   const [recentFiles, setRecentFiles] = useState<any[]>([]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploaded = Array.from(e.target.files || []).map((file) => ({
-      id: crypto.randomUUID(),
-      name: file.name,
-      type: file.type.split("/")[1]?.toUpperCase() || "FILE",
-      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-      date: new Date().toISOString(),
-      category: category || "Uncategorized", // Use the provided category or default to 'Uncategorized'
-      tags: [],
-    }));
+    const uploaded = Array.from(e.target.files || []).map((file) => {
+      const f = file as File;
+      return {
+        id: crypto.randomUUID(),
+        name: f.name,
+        type: f.type.split("/")[1]?.toUpperCase() || "FILE",
+        size: `${(f.size / 1024 / 1024).toFixed(1)} MB`,
+        date: new Date().toISOString(),
+        category: category || "Uncategorized", // Use the provided category or default to 'Uncategorized'
+        tags: [],
+      };
+    });
     setFiles([...files, ...uploaded]);
     setCategory(""); // Clear category after upload
   };
