@@ -9,18 +9,15 @@ export const extractText = async (filePath: string): Promise<string> => {
   if (ext === ".pdf") {
     const data = await fs.readFile(filePath);
     const pdfData = await pdfParse(data);
-    return pdfData.text || "[No text found in PDF]";
+    return pdfData.text;
   }
 
   if (ext === ".docx") {
     const data = await fs.readFile(filePath);
     const result = await mammoth.extractRawText({ buffer: data });
-    return result.value || "[No text found in DOCX]";
+    return result.value;
   }
 
-  if (ext === ".txt") {
-    return await fs.readFile(filePath, "utf-8");
-  }
-
-  return "[Unsupported file type]";
+  // Default: treat as plain text
+  return await fs.readFile(filePath, "utf-8");
 };

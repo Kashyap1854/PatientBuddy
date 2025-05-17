@@ -15,14 +15,12 @@ export const uploadFile = async (req: Request, res: Response) => {
     // THIS IS THE ONLY LINE THAT SHOULD BE USED TO GET CONTENT:
     const extractedText = await extractText(filePath);
 
-    // Save only the extracted text, NOT the file buffer!
     const fileDoc = new FileModel({
       filename: req.file.originalname,
       content: extractedText,
+      category: req.body.category, // Make sure this is present
     });
     await fileDoc.save();
-
-    // fs.unlinkSync(filePath);
 
     res.json({ message: "File uploaded and data saved!", data: fileDoc });
   } catch (err: any) {
