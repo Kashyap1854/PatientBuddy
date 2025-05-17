@@ -135,6 +135,16 @@ def ask_question():
         'answer': answer
     })
 
+@app.route('/api/ai/ask', methods=['POST'])
+def ask():
+    data = request.get_json()
+    question = data.get('question')
+    print("Received question:", question)
+    # Use extracted parameters from session if available
+    parameters = session.get('parameters', {})
+    answer = llm.get_answer(question, parameters)
+    return jsonify({'answer': answer})
+
 if __name__ == '__main__':
     # Create templates directory if it doesn't exist
     os.makedirs(os.path.join(os.path.dirname(__file__), 'templates'), exist_ok=True)
