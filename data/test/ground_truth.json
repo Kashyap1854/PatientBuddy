@@ -1,0 +1,25 @@
+{
+  "samples": {
+    "pdf_sample_1.pdf": {
+      "parameters": {
+        "Hemoglobin": 14.2,
+        "WBC": 7.5,
+        "Platelets": 250,
+        "Glucose": 90
+      },
+      "type": "pdf"
+    },
+    "image_sample_1.jpg": {
+      "parameters": {
+        "Hemoglobin": 10.5,
+        "WBC": 12.1,
+        "Platelets": 145,
+        "Glucose": 105
+      },
+      "type": "image"
+    }
+  },
+  "abnormal_parameters": {
+    "image_sample_1.jpg": ["Hemoglobin", "WBC", "Platelets", "Glucose"]
+  }
+}
