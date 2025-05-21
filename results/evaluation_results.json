@@ -1,0 +1,38 @@
+{
+  "overall": {
+    "accuracy": 85.71428571428571,
+    "abnormality_detection": {
+      "precision": 75.0,
+      "recall": 100.0,
+      "f1_score": 85.71428571428571,
+      "true_positives": 3,
+      "false_positives": 1,
+      "false_negatives": 0
+    },
+    "processing_time": 0.8867571353912354,
+    "total_documents": 2,
+    "total_parameters": 7,
+    "correctly_extracted_parameters": 6
+  },
+  "by_document_type": {
+    "pdf": {
+      "accuracy": 100.0,
+      "total_documents": 1,
+      "avg_processing_time": 0.23389673233032227,
+      "ocr_fallback_percentage": 0.0
+    },
+    "image": {
+      "accuracy": 66.66666666666666,
+      "total_documents": 1,
+      "avg_processing_time": 1.5396175384521484,
+      "ocr_fallback_percentage": 0
+    },
+    "text": {
+      "accuracy": 0,
+      "total_documents": 0,
+      "avg_processing_time": 0,
+      "ocr_fallback_percentage": 0
+    }
+  },
+  "timestamp": "2025-05-20 20:33:06"
+}

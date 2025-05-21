@@ -3,7 +3,7 @@ import re
 from src.extraction.medical_ranges import medical_ranges, is_abnormal, get_normal_range, get_unit
 
 class LLMInterface:
-    def __init__(self, model_name="phi3"):
+    def __init__(self, model_name="tinyllama"):
         self.model_name = model_name
         self._check_ollama()
     
@@ -77,8 +77,24 @@ class LLMInterface:
     def _query_llm(self, question, parameters):
         """Query the LLM for an answer"""
         try:
+            # Check if the question is non-medical
+            non_medical_keywords = [
+                'restaurant', 'movie', 'weather', 'sports', 'politics', 'travel', 
+                'hotel', 'vacation', 'stock', 'investment', 'recipe', 'cook', 
+                'game', 'entertainment', 'celebrity', 'music', 'book recommendation'
+            ]
+            
+            # Simple check for non-medical topics
+            if any(keyword in question.lower() for keyword in non_medical_keywords):
+                return "I'm a medical assistant focused on helping with health-related questions and lab results. I can't provide information about non-medical topics."
+            
             # Build prompt with context from parameters
-            prompt = "You are a helpful medical assistant. "
+            prompt = """You are a helpful medical assistant. ONLY answer questions related to medical topics, health, lab results, or patient conditions.
+For any questions outside medical domain (like restaurants, entertainment, politics, travel, etc.), say:
+"I'm a medical assistant focused on helping with health-related questions and lab results. I can't provide information about non-medical topics."
+
+Never make up medical information. Be accurate and precise.
+"""
             
             if parameters:
                 prompt += "Here are the medical test results:\n\n"

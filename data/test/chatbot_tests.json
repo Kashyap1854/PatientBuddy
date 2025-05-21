@@ -1,0 +1,42 @@
+{
+  "conversations": [
+    {
+      "id": "medical_query_1",
+      "description": "Basic medical information query",
+      "turns": [
+        {
+          "query": "What is Hb?",
+          "expected_response": "Hb is an abbreviation for hemoglobin, which refers to the protein in red blood cells that carries oxygen from the lungs to other parts of the body. Hemoglobin helps to transport oxygen throughout the body, supporting the functioning of different organs and tissues.",
+          "tests_medical": true
+        }
+      ]
+    },
+    {
+      "id": "parameter_query",
+      "description": "Testing parameter-based response",
+      "parameters": {
+        "Hemoglobin": {"value": 18.0, "unit": "g/dL"},
+        "RBC": {"value": 6.2, "unit": "x10^12/L"},
+        "WBC": {"value": 5.2, "unit": "x10^9/L"}
+      },
+      "turns": [
+        {
+          "query": "Is my hemoglobin normal?",
+          "expected_response": "Your Hemoglobin is 18.0 g/dL, which is abnormal. The normal range is 12-16 g/dL.",
+          "tests_medical": true
+        }
+      ]
+    },
+    {
+      "id": "unknown_query",
+      "description": "Testing handling of unknown or out-of-scope queries",
+      "turns": [
+        {
+          "query": "Can you recommend a good restaurant?",
+          "expected_response": "I'm a medical assistant. I can't provide information about non-medical topics. I can't provide restaurant recommendations.",
+          "tests_unknown": true
+        }
+      ]
+    }
+  ]
+}
